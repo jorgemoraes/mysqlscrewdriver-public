@@ -70,8 +70,8 @@ Ferramenta web para servir como uma chave de fenda para MySQL, construída com P
 
 ## Estrutura do Projeto
 
-```
-```
+
+```text
 mysqlscrewdriver/
 ├── app/
 │   ├── main.py
@@ -84,14 +84,17 @@ mysqlscrewdriver/
 │   │   ├── database.db
 │   │   ├── functions.py
 │   │   └── models.py
-│   ├── configs/
-│   │   └── __pycache__/
+│   ├── docs/
+│   │   ├── backupcli_S3.jpg
+│   │   ├── create_account.jpg
+│   │   └── mysqlslap.jpg
 │   ├── document/
 │   │   └── schemaspy.py
 │   ├── exporttable/
 │   │   ├── backupcli_local.py
 │   │   └── backupcli_S3.py
 │   ├── home/
+│   │   ├── homepage.md
 │   │   └── homepage.py
 │   ├── outputdir/
 │   │   └── backups.md
@@ -100,7 +103,6 @@ mysqlscrewdriver/
 │       ├── db.py
 │       ├── passgen.py
 │       ├── sqllite.py
-│       └── __pycache__/
 ├── requirements.txt
 ├── Dockerfile
 ├── docker-compose.yml
@@ -108,6 +110,7 @@ mysqlscrewdriver/
 ├── LICENSE
 └── README.md
 ```
+
 
 ## Observações
 
