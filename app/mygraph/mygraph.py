@@ -84,6 +84,7 @@ if submitedd_explain:
         valida_variable(v_host, v_port, v_dbauser, v_dbapwd, v_database)
     else:
         st.error("Preencha todos os campos.")
+        st.stop()
 
     with st.status(execstatus, expanded=True, state="running")as status:
         stmt = f'mysql -h {v_host} -P {v_port} -p\"{v_dbapwd}\" -D {v_database} -u {v_dbauser} -N -B --raw -e "{v_sql}" > "./outputdir/{v_sql_digest}.json"'        
@@ -91,7 +92,7 @@ if submitedd_explain:
             result = cmd.execute_command(stmt)    
         except Exception as e:
             st.error(f"Erro ao executar o comando: {str(e)}")
-            st.stop()                
+            st.stop()
         
         try:
             result = subprocess.run(gengraph, shell=True, capture_output=True, text=True, cwd="./mygraph")
@@ -102,7 +103,6 @@ if submitedd_explain:
                 with open(output_file, "rb") as file:
                     st.session_state.svg_content = file.read()
                 st.session_state.svg_filename = v_sql_digest + ".svg"
-                st.session_state.auto_download = True
         except Exception as e:
             st.error(f"Erro ao executar o comando: {str(e)}")
             st.stop()
@@ -122,30 +122,6 @@ if submitedd_explain:
 
 # Read the SVG file content
 if st.session_state.get("generated_files"):
-    st.download_button(
-        label="Download FlameGraph",
-        data=st.session_state.svg_content,
-        file_name=st.session_state.svg_filename,
-        mime="image/svg+xml",
-        key="download_flamegraph",
-        on_click="ignore",
-    )
-
-    if st.session_state.get("auto_download"):
-        b64 = base64.b64encode(st.session_state.svg_content).decode("utf-8")
-        components.html(
-            f"""
-            <a id="autoDl" href="data:image/svg+xml;base64,{b64}" download="{st.session_state.svg_filename}" style="display:none;"></a>
-            <script>
-              const a = document.getElementById('autoDl');
-              if (a) a.click();
-            </script>
-            """,
-            height=0,
-            width=0,
-        )
-        st.session_state.auto_download = False
-
     b64 = base64.b64encode(st.session_state.svg_content).decode("utf-8")
     components.html(
         f"""
@@ -155,6 +131,15 @@ if st.session_state.get("generated_files"):
         ></iframe>
         """,
         height=700,
+    )
+
+    st.download_button(
+        label="Download FlameGraph",
+        data=st.session_state.svg_content,
+        file_name=st.session_state.svg_filename,
+        mime="image/svg+xml",
+        key="download_flamegraph",
+        on_click="ignore",
     )
 
     st.session_state.generated_files = None
