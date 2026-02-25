@@ -1,4 +1,4 @@
 pandas
-streamlit
+streamlit==1.48.1
 mysql-connector-python
 sqlalchemy
