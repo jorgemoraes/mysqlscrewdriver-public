@@ -5,6 +5,8 @@ from tools.sqllite import SessionLocal
 import config.functions as func
 import subprocess
 import os
+import base64
+import streamlit.components.v1 as components
 
 
 def valida_variable(host, port, user, pwd, database):
@@ -15,6 +17,17 @@ def valida_variable(host, port, user, pwd, database):
         return
     pass
 
+
+def render_svg(svg_file):
+    with open(svg_file, "r") as f:
+        lines = f.readlines()
+        svg = "".join(lines)
+
+        """Renders the given svg string."""
+        b64 = base64.b64encode(svg.encode("utf-8")).decode("utf-8")
+        html = r'<img src="data:image/svg+xml;base64,%s"/>' % b64
+        return html
+        
 
 st.subheader('Explain Analyze MySQL Statement')
 
@@ -65,7 +78,7 @@ gengraph = f'perl "{perl_script_path}" "{input_file}" > "{output_file}"'
 ### Execute 
 
 submitedd_explain = st.button("Execute Explainer")
-if submitedd_explain:
+if submitedd_explain:    
     execstatus = f' Executando explain analyze na base  schema="{v_database}" com usuario {v_dbauser}'
     if v_host and v_port and v_dbauser and v_dbapwd and v_database:
         valida_variable(v_host, v_port, v_dbauser, v_dbapwd, v_database)
@@ -84,6 +97,12 @@ if submitedd_explain:
             result = subprocess.run(gengraph, shell=True, capture_output=True, text=True, cwd="./mygraph")
             if result.returncode != 0:
                 st.error(f"Erro ao gerar SVG: {result.stderr}")
+            else:
+                st.session_state.generated_files = [output_file]
+                with open(output_file, "rb") as file:
+                    st.session_state.svg_content = file.read()
+                st.session_state.svg_filename = v_sql_digest + ".svg"
+                st.session_state.auto_download = True
         except Exception as e:
             st.error(f"Erro ao executar o comando: {str(e)}")
             st.stop()
@@ -100,3 +119,43 @@ if submitedd_explain:
         status.update(
             label="Execute complete!", state="complete", expanded=False
         )
+
+# Read the SVG file content
+if st.session_state.get("generated_files"):
+    st.download_button(
+        label="Download FlameGraph",
+        data=st.session_state.svg_content,
+        file_name=st.session_state.svg_filename,
+        mime="image/svg+xml",
+        key="download_flamegraph",
+        on_click="ignore",
+    )
+
+    if st.session_state.get("auto_download"):
+        b64 = base64.b64encode(st.session_state.svg_content).decode("utf-8")
+        components.html(
+            f"""
+            <a id="autoDl" href="data:image/svg+xml;base64,{b64}" download="{st.session_state.svg_filename}" style="display:none;"></a>
+            <script>
+              const a = document.getElementById('autoDl');
+              if (a) a.click();
+            </script>
+            """,
+            height=0,
+            width=0,
+        )
+        st.session_state.auto_download = False
+
+    b64 = base64.b64encode(st.session_state.svg_content).decode("utf-8")
+    components.html(
+        f"""
+        <iframe
+          src="data:image/svg+xml;base64,{b64}"
+          style="width: 100%; height: 700px; border: 1px solid #ddd; border-radius: 6px;"
+        ></iframe>
+        """,
+        height=700,
+    )
+
+    st.session_state.generated_files = None
+
