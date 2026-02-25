@@ -23,6 +23,9 @@ pages = {
     "Performance Tests": [
         st.Page("benchmark/mysqlslap.py", title="Run Slap Benchmark"),
     ],
+    "Mysql DDL Compare": [
+        st.Page("compare/ddlCompare.py", title="Execute DDL Compare"),
+    ],    
     "Documentation": [
         st.Page("document/schemaspy.py", title="Generate with SchemaSpy"),
     ],

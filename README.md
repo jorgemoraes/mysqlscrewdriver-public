@@ -48,24 +48,28 @@ Ferramenta web para servir como uma chave de fenda para MySQL, construída com P
 
 1. Crie um novo ambiente virtual:
     ```bash
-    python -m venv my_project_env
+    python -m venv venv
     ```
 2. Ative o ambiente virtual:
     - **Windows:**
       ```bash
-      my_project_env\Scripts\activate
+      venv\Scripts\activate
       ```
     - **Linux/macOS:**
       ```bash
-      source my_project_env/bin/activate
+      source venv/bin/activate
       ```
 3. Instale as dependências:
     ```bash
     pip install -r requirements.txt
     ```
-4. Execute o app:
+4. Acesse a pasta da app:
     ```bash
-    streamlit run app/main.py
+    cd app
+    ```
+5. Execute o app:
+    ```bash
+    streamlit run main.py
     ```
 
 ## Estrutura do Projeto
@@ -125,7 +129,7 @@ mysqlscrewdriver/
 - Forçar pull da imagem Ubuntu e recriar containers:
     ```bash
     docker pull ubuntu:24.10
-    docker compose up --build --force-recreate
+    docker compose up -d --build --force-recreate
     ```
 - Cadastro de host para execução interna:
     ```bash
