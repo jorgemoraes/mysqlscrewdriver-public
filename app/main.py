@@ -23,6 +23,9 @@ pages = {
     "Performance Tests": [
         st.Page("benchmark/mysqlslap.py", title="Run Slap Benchmark"),
     ],
+    "Explain Analyze": [
+        st.Page("mygraph/mygraph.py", title="Run Explain Analyze"),
+    ],    
     "Mysql DDL Compare": [
         st.Page("compare/ddlCompare.py", title="Execute DDL Compare"),
     ],    

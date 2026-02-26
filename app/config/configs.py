@@ -67,17 +67,22 @@ with tab2:
     st.subheader("Adicionar Configuração")
     with st.form("add_form", clear_on_submit=True):
         config_dict = {f"{c.name}": c for c in configs}
-        selected = st.selectbox("Selecione a configuração", list(config_dict.keys()), key="add_selectbox", accept_new_options=True)
-        name = config_dict[selected].name
-        value = st.text_area("Valor", height=80)
+        selected = st.selectbox("Nome da configuração", list(config_dict.keys()), key="add_selectbox", accept_new_options=True)
+            # Se o usuário digitou uma nova opção, selected não estará em config_dict
+        if selected in config_dict:
+            name = config_dict[selected].name
+        else:
+            name = selected  # Novo valor digitado pelo usuário
+        value = st.text_area("Valor da configuração", height=80)
         submitted = st.form_submit_button("Adicionar")
         if submitted:
-            errors = validate_config(name, value)
+            errors = validate_config(name.lower(), value)
             if errors:
                 for err in errors:
                     st.error(err)
             else:
-                create_config(session, name, value)
+                create_config(session, name.lower(), value)
+                st.rerun()
 
 with tab3:
     st.subheader("Atualizar Configuração")

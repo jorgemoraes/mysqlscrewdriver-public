@@ -4,13 +4,23 @@ Ferramenta web para servir como uma chave de fenda para MySQL, construída com P
 
 ## Funcionalidades
 
+- **Gerenciamento de configurações:** Criação, leitura, atualização e exclusão de configurações.
+![Exemplo da tela de gerenciamento de configurações](app/docs/configs.jpg)
 - **Gerenciamento de usuários:** Criação de usuários e reset de senha com mensagens e parâmetros customizáveis.
 ![Exemplo da tela de criação de conta](app/docs/create_account.jpg)
 - **Exportação de tabelas/views:** Exporta tabelas/views do MySQL em CSV localmente ou diretamente para o S3 usando `mysql-shell`.
 ![Exemplo da tela de backup para o S3](app/docs/backupcli_S3.jpg)
 - **Benchmark (`mysqlslap`):** Testes de performance com mysqlslap.
 ![Exemplo da tela de criação de benchmark com mysqlslap](app/docs/mysqlslap.jpg)
-- **Configurações:** Customizações com interface web simples e intuitiva (Streamlit).
+- **Geração de Explain:** Gera explain de uma query.
+![Exemplo da tela de geração de explain](app/docs/explain.jpg)
+![Exemplo dos tipos de graficos](app/docs/graphs.jpg)
+## Credits
+- [Brendan Gregg's FlameGraph](https://github.com/brendangregg/FlameGraph) - Original flame graph implementation
+- [Tanel Poder](https://tanelpoder.com/) - SQL Plan FlameGraph concept and label format inspiration
+- [Vinicius Malvestio Grippa](https://github.com/vgrippa/myflames) - All views use a single unified parser
+- **Comparação de DDL:** Compara tabelas entre bancos de dados.
+![Exemplo da tela de comparação de DDL](app/docs/comparison.jpg)
 
 - **Documentação:** (Futuro) Integração com SchemaSpy para geração de documentação do banco.
 
