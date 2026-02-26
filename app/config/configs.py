@@ -2,6 +2,7 @@ import streamlit as st
 from sqlalchemy.orm import Session
 from config.models import Config
 from tools.sqllite import SessionLocal, init_db
+import uuid
 
 init_db()
 session = SessionLocal()
