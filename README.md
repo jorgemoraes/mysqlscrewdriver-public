@@ -15,6 +15,10 @@ Ferramenta web para servir como uma chave de fenda para MySQL, construída com P
 - **Geração de Explain:** Gera explain de uma query.
 ![Exemplo da tela de geração de explain](app/docs/explain.jpg)
 ![Exemplo dos tipos de graficos](app/docs/graphs.jpg)
+## Credits
+- [Brendan Gregg's FlameGraph](https://github.com/brendangregg/FlameGraph) - Original flame graph implementation
+- [Tanel Poder](https://tanelpoder.com/) - SQL Plan FlameGraph concept and label format inspiration
+- [Vinicius Malvestio Grippa](https://github.com/vgrippa/myflames) - All views use a single unified parser
 - **Comparação de DDL:** Compara tabelas entre bancos de dados.
 ![Exemplo da tela de comparação de DDL](app/docs/comparison.jpg)
 
