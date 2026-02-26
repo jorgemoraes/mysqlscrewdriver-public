@@ -9,6 +9,19 @@ import base64
 import streamlit.components.v1 as components
 
 
+def cleanup_generated_files():
+    files = st.session_state.get("generated_files") or []
+    for file_path in files:
+        try:
+            if file_path and os.path.exists(file_path):
+                os.remove(file_path)
+        except Exception:
+            pass
+    st.session_state.generated_files = None
+    st.session_state.svg_content = None
+    st.session_state.svg_filename = None
+
+
 def valida_variable(host, port, user, pwd, database):
     comando = f'mysql -h "{host}" -P {port} -u "{user}" -p\"{pwd}\" -D "{database}" -e "select @@explain_json_format_version;"'
     resultado = cmd.execute_command(comando)
@@ -51,6 +64,10 @@ with col2:
     v_dbapwd = st.text_input("Password to Connect: :red[*]", type="password")
 with col3:
     v_database = st.text_input("Database: :red[*]")
+
+v_type = st.radio("Type: :red[*]", ["flamegraph", "bargraph", "treemap"],key="type",horizontal=True)
+v_title = f"{v_database} - Query Analysis"
+
 v_sql_input = st.text_area("Statement to test: ", height=200)
 
 v_sql = v_sql_input.replace("\n", " ")
@@ -67,11 +84,12 @@ base_dir = os.path.abspath(os.path.dirname(__file__))
 app_dir = os.path.dirname(base_dir)
 
 perl_script_path = os.path.join(base_dir, "mysql-explain.pl")
+#perl_script_path = os.path.join(base_dir, "mysql-explain-flamegraph.pl")
 input_file = os.path.join(app_dir, "outputdir", f"{v_sql_digest}.json")
 output_file = os.path.join(app_dir, "outputdir", f"{v_sql_digest}.svg")
 
 # Usar string shell com caminhos absolutos
-gengraph = f'perl "{perl_script_path}" "{input_file}" > "{output_file}"'
+gengraph = f'perl "{perl_script_path}" --type {v_type} --title "{v_title}" "{input_file}" > "{output_file}"'
 
 
 
@@ -99,7 +117,7 @@ if submitedd_explain:
             if result.returncode != 0:
                 st.error(f"Erro ao gerar SVG: {result.stderr}")
             else:
-                st.session_state.generated_files = [output_file]
+                st.session_state.generated_files = [input_file, output_file]
                 with open(output_file, "rb") as file:
                     st.session_state.svg_content = file.read()
                 st.session_state.svg_filename = v_sql_digest + ".svg"
@@ -139,8 +157,5 @@ if st.session_state.get("generated_files"):
         file_name=st.session_state.svg_filename,
         mime="image/svg+xml",
         key="download_flamegraph",
-        on_click="ignore",
+        on_click=cleanup_generated_files,
     )
-
-    st.session_state.generated_files = None
-
