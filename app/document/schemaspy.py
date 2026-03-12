@@ -20,3 +20,16 @@ st.subheader("Generate with SchemaSpy")
 # while True:
 #     schedule.run_pending()
 #     time.sleep(60)  # Check every 60 seconds
+
+# opção 2 
+
+#from apscheduler.schedulers.background import BackgroundScheduler
+
+#def my_task():
+#    print("Task executed!")
+
+#scheduler = BackgroundScheduler()
+# Schedule task with a cron-style expression (e.g., every weekday at 1:31 AM)
+#scheduler.add_job(my_task, 'cron', day_of_week='mon-fri', hour='1', minute='31')
+#scheduler.start()
+

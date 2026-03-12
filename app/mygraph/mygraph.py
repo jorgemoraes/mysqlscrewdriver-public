@@ -73,7 +73,7 @@ v_sql_input = st.text_area("Statement to test: ", height=200)
 v_sql = v_sql_input.replace("\n", " ")
 v_sql = v_sql.replace("`", "")
 v_sql = v_sql.replace(";", "")
-v_sql = "EXPLAIN ANALYZE FORMAT=JSON "+v_sql
+v_sql = "set session explain_json_format_version = 2; EXPLAIN ANALYZE FORMAT=JSON "+v_sql
 
 timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
@@ -99,7 +99,8 @@ submitedd_explain = st.button("Execute Explainer")
 if submitedd_explain:    
     execstatus = f' Executando explain analyze na base  schema="{v_database}" com usuario {v_dbauser}'
     if v_host and v_port and v_dbauser and v_dbapwd and v_database:
-        valida_variable(v_host, v_port, v_dbauser, v_dbapwd, v_database)
+        pass
+        #valida_variable(v_host, v_port, v_dbauser, v_dbapwd, v_database)
     else:
         st.error("Preencha todos os campos.")
         st.stop()
