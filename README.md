@@ -147,7 +147,7 @@ mysqlscrewdriver/
     ```
 - Acesso ao host da app:
     ```bash
-    docker run -it mysqlscrewdriver-app /bin/bash
+    docker run -it mysqlscrewdriver-public-app /bin/bash
     ```
 
 ### Como Contribuir
