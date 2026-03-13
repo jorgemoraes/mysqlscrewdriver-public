@@ -65,7 +65,7 @@ with col2:
 with col3:
     v_database = st.text_input("Database: :red[*]")
 
-v_type = st.radio("Type: :red[*]", ["flamegraph", "bargraph", "treemap"],key="type",horizontal=True)
+v_type = st.radio("Type: :red[*]", ["diagram","flamegraph", "bargraph", "treemap"],key="type",horizontal=True)
 v_title = f"{v_database} - Query Analysis"
 
 v_sql_input = st.text_area("Statement to test: ", height=200)
@@ -83,13 +83,12 @@ v_sql_digest = f"sql_{v_host}_{v_database}_{timestamp}"
 base_dir = os.path.abspath(os.path.dirname(__file__))
 app_dir = os.path.dirname(base_dir)
 
-perl_script_path = os.path.join(base_dir, "mysql-explain.pl")
-#perl_script_path = os.path.join(base_dir, "mysql-explain-flamegraph.pl")
+python_script_path = os.path.join(base_dir, "mysql_explain.py")
 input_file = os.path.join(app_dir, "outputdir", f"{v_sql_digest}.json")
 output_file = os.path.join(app_dir, "outputdir", f"{v_sql_digest}.svg")
 
 # Usar string shell com caminhos absolutos
-gengraph = f'perl "{perl_script_path}" --type {v_type} --title "{v_title}" "{input_file}" > "{output_file}"'
+gengraph = f'python3 "{python_script_path}" --type {v_type} --title "{v_title}" "{input_file}" > "{output_file}"'
 
 
 
