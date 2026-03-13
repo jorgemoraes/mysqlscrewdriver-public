@@ -1,367 +1,301 @@
-# MySQL EXPLAIN Flame Graphs
+# myflames — MySQL Query Plan Visualizer
 
-Visualize MySQL query execution plans as interactive flame graphs, bar charts, and treemaps. All views use a **single unified parser**. Inspired by [Brendan Gregg's FlameGraph](https://github.com/brendangregg/FlameGraph) project and [Tanel Poder's SQL Plan FlameGraphs](https://tanelpoder.com/posts/visualizing-sql-plan-execution-time-with-flamegraphs/).
+Visualize MySQL `EXPLAIN ANALYZE FORMAT=JSON` output as interactive SVG charts. Four output types, one parser, no external dependencies.
 
-## Examples
+Inspired by [Brendan Gregg's FlameGraph](https://github.com/brendangregg/FlameGraph) and [Tanel Poder's SQL Plan FlameGraphs](https://tanelpoder.com/posts/visualizing-sql-plan-execution-time-with-flamegraphs/).
 
-### Flame Graph (default)
-![Flame Graph Example](demos/mysql-query-example-1.svg)  
-<a href="https://vgrippa.github.io/myflames/demos/mysql-query-example-1.html" target="_blank" rel="noopener">**Open interactive**</a> — full page, zoom, search, tooltips
+---
 
-### Icicle Graph (inverted)
-![Icicle Graph Example](demos/mysql-query-example-2-inverted.svg)  
-<a href="https://vgrippa.github.io/myflames/demos/mysql-query-example-2-inverted.html" target="_blank" rel="noopener">**Open interactive**</a>
+## Output types
 
-### Custom Colors (green)
-![Green Flame Graph Example](demos/mysql-query-example-3-green.svg)  
-<a href="https://vgrippa.github.io/myflames/demos/mysql-query-example-3-green.html" target="_blank" rel="noopener">**Open interactive**</a>
+| Type | Best for | Command |
+|------|----------|---------|
+| **Flame graph** | Seeing the full execution hierarchy and time distribution | `python3 -m myflames explain.json` |
+| **Bar chart** | Quickly finding the slowest individual operations | `python3 -m myflames --type bargraph explain.json` |
+| **Treemap** | Comparing relative cost of all operations at a glance | `python3 -m myflames --type treemap explain.json` |
+| **Diagram** | Understanding join order and access paths (like MySQL Workbench Visual Explain) | `python3 -m myflames --type diagram explain.json` |
 
-### Bar Chart (self-time breakdown)
-![Bar Chart Example](demos/mysql-query-bargraph.svg)  
-<a href="https://vgrippa.github.io/myflames/demos/mysql-query-bargraph.html" target="_blank" rel="noopener">**Open interactive**</a>
+Every view includes a **Query Analysis panel** below the chart with optimizer features detected, warnings (full table scans, hash joins, BNL join buffers, temp tables, filesorts), and tuning suggestions.
 
-### Treemap (hierarchy by total time)
-![Treemap Example](demos/mysql-query-treemap.svg)  
-<a href="https://vgrippa.github.io/myflames/demos/mysql-query-treemap.html" target="_blank" rel="noopener">**Open interactive**</a>
+---
 
-### Viewing the demos (interactive zoom, search, tooltips)
+## Live demos
 
-The SVGs contain JavaScript for zoom, search, and tooltips. **Opening the raw file URL** (e.g. `raw.githubusercontent.com/.../file.svg`) does **not** run that script—browsers block inline script in SVGs from that origin for security.
+### Complex join — all four views
 
-Use one of these so the SVG works properly:
+| View | Interactive demo |
+|------|-----------------|
+| Flame graph | [mysql-query-complex-flamegraph.html](https://vgrippa.github.io/myflames/demos/mysql-query-complex-flamegraph.html) |
+| Bar chart | [mysql-query-complex-bargraph.html](https://vgrippa.github.io/myflames/demos/mysql-query-complex-bargraph.html) |
+| Treemap | [mysql-query-complex-treemap.html](https://vgrippa.github.io/myflames/demos/mysql-query-complex-treemap.html) |
+| Diagram | [mysql-query-complex-diagram.html](https://vgrippa.github.io/myflames/demos/mysql-query-complex-diagram.html) |
 
-| Where | How |
-|-------|-----|
-| **GitHub Pages** | The “Open interactive” links above open a full-page view with JavaScript enabled (zoom, search, tooltips). Requires *Settings → Pages → Deploy from branch → Branch: master, Folder: /docs*. |
-| **All demos** | **[Index page](https://vgrippa.github.io/myflames/)** — all demos in one page. |
-| **Locally** | After cloning, open a demo in your browser (same-origin as `file://`): |
-| | `open demos/mysql-query-example-1.svg` (macOS) |
-| | `xdg-open demos/mysql-query-example-1.svg` (Linux) |
-| | `start demos/mysql-query-example-1.svg` (Windows) |
+### Query Analysis panel demos
 
-## Features
+| Scenario | Flamegraph | Bar chart | Treemap | Diagram |
+|----------|-----------|-----------|---------|---------|
+| Full table scan | [fg](https://vgrippa.github.io/myflames/demos/mysql-query-analysis-full-scan-flamegraph.html) | [bar](https://vgrippa.github.io/myflames/demos/mysql-query-analysis-full-scan-bargraph.html) | [tree](https://vgrippa.github.io/myflames/demos/mysql-query-analysis-full-scan-treemap.html) | [diag](https://vgrippa.github.io/myflames/demos/mysql-query-analysis-full-scan-diagram.html) |
+| Hash join | [fg](https://vgrippa.github.io/myflames/demos/mysql-query-analysis-hash-join-flamegraph.html) | [bar](https://vgrippa.github.io/myflames/demos/mysql-query-analysis-hash-join-bargraph.html) | [tree](https://vgrippa.github.io/myflames/demos/mysql-query-analysis-hash-join-treemap.html) | [diag](https://vgrippa.github.io/myflames/demos/mysql-query-analysis-hash-join-diagram.html) |
+| BNL join buffer | [fg](https://vgrippa.github.io/myflames/demos/mysql-query-analysis-bnl-flamegraph.html) | [bar](https://vgrippa.github.io/myflames/demos/mysql-query-analysis-bnl-bargraph.html) | [tree](https://vgrippa.github.io/myflames/demos/mysql-query-analysis-bnl-treemap.html) | [diag](https://vgrippa.github.io/myflames/demos/mysql-query-analysis-bnl-diagram.html) |
+| Index Condition Pushdown | [fg](https://vgrippa.github.io/myflames/demos/mysql-query-analysis-icp-flamegraph.html) | [bar](https://vgrippa.github.io/myflames/demos/mysql-query-analysis-icp-bargraph.html) | [tree](https://vgrippa.github.io/myflames/demos/mysql-query-analysis-icp-treemap.html) | [diag](https://vgrippa.github.io/myflames/demos/mysql-query-analysis-icp-diagram.html) |
 
-- **Flame Graph**: Hierarchical visualization showing query execution flow and time distribution
-- **Bar Chart**: Simple horizontal bar chart sorted by self-time (slowest operations first)
-- **Treemap**: Hierarchical rectangles by total time (area = time)
-- **Single parser**: One code path parses the JSON; flamegraph, bargraph, and treemap share the same data
-- **Auto-scaling**: Automatically switches between milliseconds (ms) and microseconds (µs) for fast queries
-- **Rich Tooltips**: Hover to see detailed metrics (rows, loops, cost, conditions, etc.)
-- **Interactive**: Click to zoom, search operations, keyboard shortcuts
+> **Note:** Interactive features (zoom, search, tooltips) require the SVG to be opened from an HTML wrapper or GitHub Pages — not from a raw GitHub URL, which blocks inline scripts.
 
-## Prerequisites
+[All demos index](https://vgrippa.github.io/myflames/)
 
-- Perl 5.x (included on most Unix/Linux/macOS systems)
-- MySQL 8.4+ with `EXPLAIN ANALYZE FORMAT=JSON` and JSON format version 2
+---
 
-### MySQL Configuration
+## Requirements
 
-This tool requires the new JSON format version 2 for EXPLAIN output, available in MySQL 8.4+:
+- **Python 3.7+** — no extra packages
+- **MySQL 8.4+** with `explain_json_format_version = 2`
+
+Enable the required JSON format:
 
 ```sql
 SET explain_json_format_version = 2;
+-- or permanently in my.cnf:
+-- [mysqld]
+-- explain_json_format_version = 2
 ```
 
-To make it permanent, add to your `my.cnf`:
-```ini
-[mysqld]
-explain_json_format_version = 2
-```
+---
 
-## Installation
+## Quick start
 
-```bash
-git clone https://github.com/vgrippa/myflames.git
-cd myflames
-chmod +x *.pl
-```
-
-## Quick Start
-
-### Step 1: Get EXPLAIN ANALYZE output from MySQL
+### 1. Get EXPLAIN ANALYZE output
 
 ```sql
 EXPLAIN ANALYZE FORMAT=JSON
-SELECT e.first_name, e.last_name, d.dept_name
-FROM employees e
-JOIN dept_emp de ON e.emp_no = de.emp_no
-JOIN departments d ON de.dept_no = d.dept_no
-WHERE e.hire_date > '1995-01-01';
+SELECT u.name, COUNT(o.id)
+FROM users u
+JOIN orders o ON u.id = o.user_id
+WHERE u.country = 'US'
+GROUP BY u.id;
 ```
 
-Save the JSON output to a file:
+Save to a file:
 
 ```bash
-mysql -u user -p database -e "EXPLAIN ANALYZE FORMAT=JSON SELECT ..." > explain.json
+mysql -u user -p mydb -N -e "EXPLAIN ANALYZE FORMAT=JSON SELECT ..." > explain.json
 ```
 
-### Example JSON Output
+Or pipe directly (stdin supported):
 
-The JSON output from `EXPLAIN ANALYZE FORMAT=JSON` looks like this:
-
-```json
-{
-  "query": "/* select#1 */ select ... from `employees`.`employees` where ...",
-  "covering": false,
-  "operation": "Index lookup on employees using idx_covered_last_first_name (last_name='Facello', first_name='Georgi')",
-  "index_name": "idx_covered_last_first_name",
-  "query_type": "select",
-  "table_name": "employees",
-  "access_type": "index",
-  "actual_rows": 2.0,
-  "schema_name": "employees",
-  "actual_loops": 1,
-  "used_columns": ["emp_no", "birth_date", "first_name", "last_name", "gender", "hire_date"],
-  "estimated_rows": 2.0,
-  "lookup_condition": "last_name='Facello', first_name='Georgi'",
-  "index_access_type": "index_lookup",
-  "actual_last_row_ms": 0.111209,
-  "actual_first_row_ms": 0.107751,
-  "estimated_total_cost": 0.7
-}
+```bash
+mysql -u user -p mydb -N -e "EXPLAIN ANALYZE FORMAT=JSON SELECT ..." | python3 -m myflames > query.svg
 ```
 
-Key fields used by the visualization:
-- `operation`: The operation being performed
-- `actual_rows`: Actual number of rows processed
-- `actual_loops`: Number of times this operation was executed
-- `actual_last_row_ms`: Time in milliseconds to complete the operation
-- `table_name`, `index_name`: Table and index being accessed
-
-### Step 2: Generate Visualizations
-
-Use the unified command (one parser, choose output with `--type`; default is flame graph):
+### 2. Generate a visualization
 
 ```bash
 # Flame graph (default)
-./mysql-explain.pl explain.json > query.svg
+python3 -m myflames explain.json > query.svg
 
-# Bar chart (self-time focused)
-./mysql-explain.pl --type bargraph explain.json > query-bar.svg
+# Bar chart — slowest operations first
+python3 -m myflames --type bargraph explain.json > query-bar.svg
 
-# Treemap (hierarchy by total time)
-./mysql-explain.pl --type treemap explain.json > query-treemap.svg
+# Treemap — area proportional to total time
+python3 -m myflames --type treemap explain.json > query-treemap.svg
+
+# Diagram — Visual Explain-style flow
+python3 -m myflames --type diagram explain.json > query-diagram.svg
 ```
 
-You can still call the legacy scripts: `./mysql-explain-flamegraph.pl ...` and `./mysql-explain-bargraph.pl ...` (they are thin wrappers around the unified script).
+### 3. Open in a browser
 
-### Step 3: View Results
-
-Open the SVG file in any web browser:
 ```bash
 open query.svg        # macOS
 xdg-open query.svg    # Linux
 start query.svg       # Windows
 ```
 
-## Usage
+---
 
-### Unified command (recommended)
-
-All output types use the **same parser**: one code path reads the JSON and builds the plan tree; then flamegraph, bargraph, or treemap is generated from that tree.
+## Installation
 
 ```bash
-./mysql-explain.pl [--type flamegraph|bargraph|treemap] [options] explain.json > output.svg
+git clone https://github.com/vgrippa/myflames.git
+cd myflames
+```
+
+Run from the repo root. No `pip install` needed.
+
+---
+
+## All options
+
+```
+python3 -m myflames [--type TYPE] [options] explain.json > output.svg
 ```
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--type TYPE` | flamegraph | Output type: `flamegraph`, `bargraph`, or `treemap` |
+| `--type` | `flamegraph` | Output type: `flamegraph`, `bargraph`, `treemap`, `diagram` |
+| `--diagram-engine` | `svg` | Diagram layout engine: `svg` (built-in) or `graphviz` (requires [Graphviz](https://graphviz.org/) on PATH) |
+| `--width N` | 1800 (fg), 1200 (others) | SVG width in pixels |
+| `--height N` | 32 | Frame height in pixels (flamegraph only) |
+| `--colors SCHEME` | `hot` | Color scheme (flamegraph only): `hot`, `mem`, `io`, `red`, `green`, `blue` |
+| `--title TEXT` | `MySQL Query Plan` | Chart title |
+| `--inverted` | off | Icicle graph — flames grow downward (flamegraph only) |
+| `--no-enhance` | off | Disable detailed tooltips (flamegraph only) |
 
-Examples:
+---
 
-```bash
-./mysql-explain.pl explain.json > query.svg
-./mysql-explain.pl --type bargraph explain.json > query-bar.svg
-./mysql-explain.pl --type treemap explain.json > query-treemap.svg
-./mysql-explain.pl --title "Slow Query" --colors mem explain.json > query.svg
-```
+## Interactive features
 
-### Flame Graph (default)
+### Flame graph
+| Action | Result |
+|--------|--------|
+| Hover frame | Shows operation details: rows, loops, time, cost, index conditions |
+| Click frame | Zoom into that operation |
+| Click Reset Zoom button | Reset zoom |
+| Ctrl+F | Search frames by regex |
 
-```bash
-./mysql-explain-flamegraph.pl [options] explain.json > output.svg
-```
-
-**Options:**
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--width N` | 1800 | SVG width in pixels |
-| `--height N` | 32 | Frame height in pixels |
-| `--colors SCHEME` | hot | Color scheme: hot, mem, io, red, green, blue |
-| `--title TEXT` | "MySQL Query Plan" | Chart title |
-| `--inverted` | (off) | Generate icicle graph (inverted flame graph) |
-| `--no-enhance` | (enabled) | Disable detailed tooltips |
-
-**Examples:**
-```bash
-# Basic usage
-./mysql-explain-flamegraph.pl explain.json > query.svg
-
-# Custom title and width
-./mysql-explain-flamegraph.pl --title "Slow Query Analysis" --width 2400 explain.json > query.svg
-
-# Icicle graph (inverted)
-./mysql-explain-flamegraph.pl --title "Slow Query Analysis" --inverted explain.json > query-inverted.svg
-
-# Green color scheme
-./mysql-explain-flamegraph.pl --title "Slow Query Analysis" --colors green explain.json > query-green.svg
-
-# Memory-style colors
-./mysql-explain-flamegraph.pl --colors mem explain.json > query.svg
-```
-
-### Bar Chart
-
-```bash
-./mysql-explain-bargraph.pl [options] explain.json > output.svg
-```
-
-**Options:**
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--width N` | 1200 | SVG width in pixels |
-| `--title TEXT` | "MySQL Query Performance" | Chart title |
-
-**Examples:**
-```bash
-# Basic usage
-./mysql-explain-bargraph.pl explain.json > query-bar.svg
-
-# Custom title
-./mysql-explain-bargraph.pl --title "Query Bottlenecks" explain.json > query-bar.svg
-```
+### Bar chart
+| Action | Result |
+|--------|--------|
+| Hover bar | Shows multi-line details in the strip below the chart |
+| Click bar | Pins the details in the strip (click again or click background to unpin) |
+| Ctrl+F | Search bars by regex |
 
 ### Treemap
+| Action | Result |
+|--------|--------|
+| Hover cell | Shows multi-line details below the chart |
+| Click cell | Zoom into that node and pin its details |
+| Click Reset Zoom button | Reset zoom |
+| Ctrl+F | Search cells by regex |
 
-```bash
-./mysql-explain.pl --type treemap [options] explain.json > output.svg
-```
+### Diagram
+| Action | Result |
+|--------|--------|
+| Hover node | Shows details in the strip below the diagram |
+| Click node | Pins the details (stays visible while you scroll) |
+| Click pinned node | Unpins |
+| Scroll wheel (diagram area only) | Zoom in/out |
+| Drag background | Pan the diagram |
+| Double-click background | Reset zoom and pan |
+| Ctrl+F | Search nodes by regex |
 
-Hierarchical treemap: each node is a rectangle; area is proportional to total time (including children). Good for seeing both hierarchy and relative cost at a glance.
+> Text in the details strip is always selectable — you can copy/paste it freely.
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `--width N` | 1200 | SVG width in pixels |
-| `--title TEXT` | "MySQL Query Plan" | Chart title |
+---
 
-```bash
-./mysql-explain.pl --type treemap explain.json > query-treemap.svg
-./mysql-explain.pl --type treemap --title "Query plan" explain.json > out.svg
-```
+## Query Analysis panel
 
-## How to Read the Flame Graph
+Every output type includes a panel below the chart with:
 
-### Structure
-- **Read bottom-to-top**: The query starts at the bottom, child operations stack upward
-- **Width = Time**: Wider bars took more total time (including children)
-- **Self-time**: The visible "top" of each bar represents time spent in that operation alone
+- **How to read** — view-specific guide
+- **Optimizer features** — e.g. `index_condition_pushdown=on`, `batched_key_access`
+- **Warnings** — issues that affect performance:
+  - Full table scans (with row count)
+  - Hash joins (with estimated build phase size)
+  - Block Nested-Loop (BNL) join buffers
+  - Temp tables / Materialize operations
+  - Filesorts
+- **Suggestions** — concrete tuning actions (add indexes, increase `join_buffer_size`, enable hash join, etc.)
 
-### Labels (Tanel Poder style)
-Each operation shows:
+Warnings also show which node label in the chart they refer to, so you can find the slow operation quickly.
+
+---
+
+## How to read each view
+
+### Flame graph
+- **Width = time** — wider frames consumed more time (including children)
+- **Bottom = root** — the query entry point; table accesses are at the top
+- **Self-time** — the visible "tip" of each frame is time spent in that operation alone
+
+Frame labels follow [Tanel Poder's format](https://tanelpoder.com/posts/visualizing-sql-plan-execution-time-with-flamegraphs/):
 ```
 OPERATION [table.index] starts=X rows=Y
 ```
+Example: `INDEX LOOKUP [orders.idx_user] starts=1000 rows=5`
+→ This lookup ran 1000 times in a nested loop, returning 5 rows each time.
 
-| Field | Meaning |
-|-------|---------|
-| `starts=X` | Number of times this operation executed (loops) |
-| `rows=Y` | Number of rows produced per execution |
+### Bar chart
+- Sorted slowest first by **self-time** (time in that operation, not counting children)
+- Percentage shows each operation's share of total query time
 
-### Example Interpretation
-```
-INDEX LOOKUP [orders.idx_customer] starts=1000 rows=5
-```
-This means: The index lookup ran **1000 times** (nested loop), returning **5 rows** each time.
+### Treemap
+- **Area = total time** (including all descendants)
+- Nested rectangles show the parent/child relationship
+- Color intensity indicates relative cost
 
-### Interactive Features
-- **Hover**: See detailed metrics (actual vs estimated rows, timing, cost, conditions)
-- **Click**: Zoom into a specific operation
-- **Search**: Press `/` or click "Search" to find operations
-- **Reset**: Click "Reset Zoom" to return to full view
+### Diagram
+- Left-to-right execution flow (table accesses → join → result)
+- **Darker color = more time** spent at that step
+- Arrows show row flow with estimated row counts
+- Diamonds represent nested-loop join decision points
 
-## How to Read the Bar Chart
+---
 
-The bar chart shows operations sorted by **self-time** (time spent in that operation alone, excluding children):
+## Time unit auto-detection
 
-- **Top = Slowest**: The slowest operations appear at the top
-- **Percentage**: Shows what portion of total time each operation consumed
-- **Best for**: Quickly identifying bottlenecks
+All views automatically switch units based on total query time:
 
-## Time Unit Auto-Detection
+| Total time | Unit |
+|------------|------|
+| ≥ 1 ms | ms (milliseconds) |
+| < 1 ms | µs (microseconds) |
 
-Both tools automatically detect query speed and adjust units:
+---
 
-| Total Query Time | Unit Used |
-|------------------|-----------|
-| ≥ 1 millisecond | **ms** (milliseconds) |
-| < 1 millisecond | **µs** (microseconds) |
+## Advanced usage
 
-This ensures even sub-millisecond operations are visible in the visualization.
-
-## Tooltip Information
-
-When hovering over operations, you'll see:
-
-| Field | Description |
-|-------|-------------|
-| **Table** | Schema.table (index: name) |
-| **Access** | Access type (index, filter, table scan, etc.) |
-| **Rows** | Actual vs estimated rows (with accuracy warnings) |
-| **Loops** | Number of iterations |
-| **Time** | First row and last row timing |
-| **Cost** | Optimizer estimated cost |
-| **Condition** | Filter/join condition |
-| **Ranges** | Index scan ranges |
-| **Covering** | Whether index covers all needed columns |
-
-## Advanced Usage
-
-### Using with MySQL Client
+### Compare before/after optimization
 
 ```bash
-# Direct pipe from MySQL
-mysql -u user -p -N -e "EXPLAIN ANALYZE FORMAT=JSON SELECT ..." database | \
-  ./mysql-explain-flamegraph.pl > query.svg
+python3 -m myflames --title "Before" before.json > before.svg
+python3 -m myflames --title "After"  after.json  > after.svg
+
+python3 -m myflames --type bargraph --title "Before" before.json > before-bar.svg
+python3 -m myflames --type bargraph --title "After"  after.json  > after-bar.svg
 ```
 
-### Comparing Multiple Queries
+### Generate folded stacks only
 
 ```bash
-# Generate multiple flame graphs
-./mysql-explain-flamegraph.pl --title "Before Optimization" before.json > before.svg
-./mysql-explain-flamegraph.pl --title "After Optimization" after.json > after.svg
+python3 stackcollapse_mysql_explain_json.py explain.json > stacks.txt
 ```
 
-### Lower-Level Tools
+Useful for feeding into other FlameGraph-compatible tools.
 
-For advanced use cases, you can use the individual components:
-
-```bash
-# Generate folded stacks only (for use with other tools)
-./stackcollapse-mysql-explain-json.pl explain.json > stacks.txt
-
-# Use with original flamegraph.pl
-./stackcollapse-mysql-explain-json.pl explain.json | \
-  ./flamegraph.pl --colors hot --title "Query" > query.svg
-```
+---
 
 ## Troubleshooting
 
-### "Cannot find flamegraph.pl"
-Ensure `flamegraph.pl` is in the same directory as `mysql-explain-flamegraph.pl`.
+**"No module named 'myflames'"**
+Run from the repo root, or use the wrapper scripts directly: `python3 mysql_explain.py`.
 
-### Empty or minimal output
-Make sure you're using `EXPLAIN ANALYZE FORMAT=JSON`, not just `EXPLAIN FORMAT=JSON`. The `ANALYZE` keyword is required for actual execution timing.
+**Empty output or parse error**
+Make sure you're using `EXPLAIN ANALYZE FORMAT=JSON` (not just `EXPLAIN FORMAT=JSON`). The `ANALYZE` keyword is required for timing data.
 
-### SVG rendering errors
-If you see XML parsing errors, ensure your MySQL version outputs valid JSON. Some special characters in table names may need escaping.
+**Interactive features not working**
+Open the `.html` wrapper file instead of the raw `.svg`. Browsers block inline scripts in SVGs loaded from `raw.githubusercontent.com`. Local `file://` access works fine.
+
+**Graphviz diagram falls back to built-in**
+Install [Graphviz](https://graphviz.org/) and ensure `dot` is on your PATH, then use `--diagram-engine graphviz`.
+
+---
+
+## Documentation
+
+| File | Contents |
+|------|----------|
+| [LEGACY-PERL.md](LEGACY-PERL.md) | Original Perl scripts (legacy, not primary) |
+| [docs/VISUAL_EXPLAIN_REFERENCE.md](docs/VISUAL_EXPLAIN_REFERENCE.md) | Diagram layout conventions and MySQL Workbench Visual Explain mapping |
+| [docs/prompts/](docs/prompts/) | Prompts and context used to build each feature (for contributors) |
+| [test/README.md](test/README.md) | Running tests and fixture generation |
+
+---
 
 ## Credits
 
-- [Brendan Gregg's FlameGraph](https://github.com/brendangregg/FlameGraph) - Original flame graph implementation
-- [Tanel Poder](https://tanelpoder.com/) - SQL Plan FlameGraph concept and label format inspiration
+- [Brendan Gregg](https://github.com/brendangregg/FlameGraph) — FlameGraph implementation (pure-Python port in `myflames/flamegraph.py`)
+- [Tanel Poder](https://tanelpoder.com/) — SQL Plan FlameGraph concept and label format
 
 ## License
 
-This project extends Brendan Gregg's FlameGraph project. See [/docs/cddl1.txt](/docs/cddl1.txt) for details.
+Extends Brendan Gregg's FlameGraph project. See [docs/cddl1.txt](docs/cddl1.txt) (CDDL 1.0).

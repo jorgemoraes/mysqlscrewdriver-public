@@ -82,49 +82,6 @@ Ferramenta web para servir como uma chave de fenda para MySQL, construída com P
     streamlit run main.py
     ```
 
-## Estrutura do Projeto
-
-
-```text
-mysqlscrewdriver/
-├── app/
-│   ├── main.py
-│   ├── account/
-│   │   └── create_account.py
-│   ├── benchmark/
-│   │   └── mysqlslap.py
-│   ├── config/
-│   │   ├── configs.py
-│   │   ├── database.db
-│   │   ├── functions.py
-│   │   └── models.py
-│   ├── docs/
-│   │   ├── backupcli_S3.jpg
-│   │   ├── create_account.jpg
-│   │   └── mysqlslap.jpg
-│   ├── document/
-│   │   └── schemaspy.py
-│   ├── exporttable/
-│   │   ├── backupcli_local.py
-│   │   └── backupcli_S3.py
-│   ├── home/
-│   │   ├── homepage.md
-│   │   └── homepage.py
-│   ├── outputdir/
-│   │   └── backups.md
-│   └── tools/
-│       ├── commands.py
-│       ├── db.py
-│       ├── passgen.py
-│       ├── sqllite.py
-├── requirements.txt
-├── Dockerfile
-├── docker-compose.yml
-├── mysql-shell.deb
-├── LICENSE
-└── README.md
-```
-
 
 ## Observações
 
